@@ -1,0 +1,124 @@
+name: triattendance-prod
+
+services:
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: triattendance-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+    networks:
+      - triattendance-net
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    container_name: triattendance-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+    depends_on:
+      - api
+    networks:
+      - triattendance-net
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: triattendance-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-triattendance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-triattendance}
+      VALKEY_HOST: valkey
+      VALKEY_PORT: 6379
+      S3_ENDPOINT: http://garage:3900
+      S3_REGION: ${S3_REGION:-garage}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-triattendance-evidence}
+      SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    networks:
+      - triattendance-net
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: triattendance-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-triattendance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-triattendance}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-triattendance} -d ${POSTGRES_DB:-triattendance}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triattendance-net
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    container_name: triattendance-valkey-prod
+    restart: unless-stopped
+    command: valkey-server --appendonly yes
+    volumes:
+      - valkeydata_prod:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triattendance-net
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: triattendance-garage-prod
+    restart: unless-stopped
+    environment:
+      GARAGE_RPC_PORT: 3901
+      GARAGE_S3_API_PORT: 3900
+      GARAGE_WEB_PORT: 3902
+    volumes:
+      - garagedata_prod:/var/lib/garage/data
+      - garagemeta_prod:/var/lib/garage/meta
+    networks:
+      - triattendance-net
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pgdata_prod:
+  valkeydata_prod:
+  garagedata_prod:
+  garagemeta_prod:
+
+networks:
+  triattendance-net:
+    driver: bridge

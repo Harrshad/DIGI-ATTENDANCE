@@ -1,0 +1,41 @@
+# Caddy reverse proxy for TriAttendance (Oracle Cloud Always Free & production)
+{$DOMAIN:localhost} {
+    # Encode responses with modern compression
+    encode zstd gzip
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+
+    # API endpoints routed to NestJS backend
+    handle /api/* {
+        reverse_proxy api:4000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Storage assets routed to Garage S3
+    handle /storage/* {
+        uri strip_prefix /storage
+        reverse_proxy garage:3900 {
+            header_up Host {host}
+        }
+    }
+
+    # All other traffic routed to Next.js Web Portal
+    handle {
+        reverse_proxy web:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

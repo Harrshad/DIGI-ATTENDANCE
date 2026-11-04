@@ -1,0 +1,76 @@
+name: triattendance-dev
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: triattendance-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: triattendance
+      POSTGRES_PASSWORD: triattendance_dev_secret
+      POSTGRES_DB: triattendance
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triattendance -d triattendance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triattendance-net
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    container_name: triattendance-valkey
+    restart: unless-stopped
+    command: valkey-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triattendance-net
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: triattendance-garage
+    restart: unless-stopped
+    ports:
+      - "3900:3900"
+      - "3902:3902"
+    environment:
+      GARAGE_RPC_PORT: 3901
+      GARAGE_S3_API_PORT: 3900
+      GARAGE_WEB_PORT: 3902
+    volumes:
+      - garagedata:/var/lib/garage/data
+      - garagemeta:/var/lib/garage/meta
+    networks:
+      - triattendance-net
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: triattendance-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    networks:
+      - triattendance-net
+
+volumes:
+  pgdata:
+  valkeydata:
+  garagedata:
+  garagemeta:
+
+networks:
+  triattendance-net:
+    driver: bridge
