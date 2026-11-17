@@ -14,6 +14,7 @@ export const exceptions = pgTable('exceptions', {
   employeeId: uuid('employee_id').notNull().references(() => employees.id),
   type: varchar('type', { length: 32 }).notNull(), // GEOFENCE | LIVENESS | MISSING_CHECKOUT
   status: varchar('status', { length: 16 }).notNull().default('Pending'), // Pending | Escalated | Resolved | Rejected
+  employeeNote: text('employee_note'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   resolvedAt: timestamp('resolved_at', { withTimezone: true }),
 });

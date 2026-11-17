@@ -23,7 +23,7 @@ export const locations = pgTable('locations', {
   name: varchar('name', { length: 64 }).notNull().unique(), // e.g. CHN-1, BLR-3
   city: varchar('city', { length: 128 }).notNull(), // e.g. Chennai, Bangalore
   address: text('address').notNull(),
-  radiusMeters: integer('radius_meters').notNull().default(500),
+  radiusMeters: integer('radius_meters').notNull().default(800),
   latitude: decimal('latitude', { precision: 10, scale: 7 }).notNull(),
   longitude: decimal('longitude', { precision: 10, scale: 7 }).notNull(),
   // PostGIS geography column — computed from lat/lng on insert

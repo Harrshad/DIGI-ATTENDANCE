@@ -7,3 +7,5 @@ export * from './attendance';
 export * from './exceptions';
 export * from './reports';
 export * from './notifications';
+export * from './device-registry';
+

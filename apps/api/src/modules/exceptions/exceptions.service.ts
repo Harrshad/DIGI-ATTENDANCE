@@ -23,6 +23,47 @@ export class ExceptionsService {
   constructor(private readonly storageService: LocalGarageStorageService) {}
 
   /**
+   * Attaches an employee escalation note to an existing exception (E20 -> E22)
+   */
+  async attachEmployeeNote(employeeId: string, attendanceId: string | undefined, note: string) {
+    let exceptionRecord;
+
+    if (attendanceId) {
+      [exceptionRecord] = await db
+        .select()
+        .from(exceptions)
+        .where(eq(exceptions.attendanceRecordId, attendanceId))
+        .limit(1);
+    } else {
+      [exceptionRecord] = await db
+        .select()
+        .from(exceptions)
+        .where(eq(exceptions.employeeId, employeeId))
+        .orderBy(desc(exceptions.createdAt))
+        .limit(1);
+    }
+
+    if (!exceptionRecord) {
+      throw new NotFoundException('No matching open exception found for this attendance.');
+    }
+
+    await db
+      .update(exceptions)
+      .set({
+        employeeNote: note,
+        status: 'Escalated',
+      })
+      .where(eq(exceptions.id, exceptionRecord.id));
+
+    return {
+      success: true,
+      exceptionId: exceptionRecord.id,
+      status: 'Escalated',
+      message: 'Message sent to supervisor. Your shift is pending review.',
+    };
+  }
+
+  /**
    * Retrieves alerts/exceptions queue matching AM 06
    */
   async getExceptionsQueue(

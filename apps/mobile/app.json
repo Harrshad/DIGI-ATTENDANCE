@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Digital Attendance",
+    "slug": "digital-attendance",
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B192C"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.triattendance.employee"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B192C"
+      },
+      "package": "com.triattendance.employee",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Digital Attendance to verify your location when you check in."
+        }
+      ],
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Allow Digital Attendance to access your camera for selfie biometric verification."
+        }
+      ]
+    ],
+    "scheme": "triattendance"
+  }
+}

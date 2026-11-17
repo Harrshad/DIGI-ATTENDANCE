@@ -17,6 +17,9 @@ export const employees = pgTable('employees', {
   // Direct reporting manager (supervisor) — stored as free text for display
   reportingManagerName: varchar('reporting_manager_name', { length: 255 }),
   reportingManagerId: uuid('reporting_manager_id'), // FK to users (supervisor)
+  passwordHash: varchar('password_hash', { length: 255 }),
+  activationVoucherHash: varchar('activation_voucher_hash', { length: 255 }),
+  isActivated: boolean('is_activated').notNull().default(false),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

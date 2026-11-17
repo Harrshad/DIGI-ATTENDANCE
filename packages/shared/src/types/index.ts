@@ -214,3 +214,69 @@ export interface AppNotification {
   createdAt: string;
   linkUrl?: string;
 }
+
+/**
+ * Mobile shift lifecycle statuses (visible on Employee Dashboard)
+ */
+export type MobileShiftStatus = 'Check-in Pending' | 'Checked IN' | 'Checked Out' | 'Pending Review';
+export const MOBILE_SHIFT_STATUSES: readonly MobileShiftStatus[] = [
+  'Check-in Pending',
+  'Checked IN',
+  'Checked Out',
+  'Pending Review',
+] as const;
+
+/**
+ * Mobile device platform
+ */
+export type DevicePlatform = 'ANDROID' | 'IOS';
+
+/**
+ * Mobile Device Registry Record
+ */
+export interface DeviceRegistration {
+  id: string;
+  employeeId: string;
+  deviceId: string;
+  deviceModel: string;
+  osVersion: string;
+  appVersion: string;
+  platform: DevicePlatform;
+  fcmToken?: string | null;
+  isActive: boolean;
+  lastActiveAt: string;
+}
+
+/**
+ * Mobile Assigned Site Info
+ */
+export interface MobileAssignedSite {
+  siteId: string;
+  siteCode: string;
+  name: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  shiftStartTime: string;
+  lateCutoffTime: string;
+  timezone: string;
+}
+
+/**
+ * Mobile Today Shift State
+ */
+export interface MobileTodayShift {
+  status: MobileShiftStatus;
+  checkInTime: string | null;
+  checkOutTime: string | null;
+  totalWorkSeconds: number;
+  totalWorkFormatted: string; // e.g. "0h 0m", "8h 12m"
+  site: MobileAssignedSite;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  exceptionPending?: boolean;
+}
+
