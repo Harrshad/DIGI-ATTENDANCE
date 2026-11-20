@@ -6,7 +6,7 @@ export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
-}): React.ReactNode {
+}) {
   return (
     <div className="flex min-h-screen bg-surface-bg">
       {/* Fixed Left Sidebar */}
