@@ -1,3 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+--> statement-breakpoint
+SET search_path TO public, extensions;
+--> statement-breakpoint
 CREATE TABLE "sessions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -33,7 +37,7 @@ CREATE TABLE "locations" (
 	"radius_meters" integer DEFAULT 500 NOT NULL,
 	"latitude" numeric(10, 7) NOT NULL,
 	"longitude" numeric(10, 7) NOT NULL,
-	"geog" "GEOGRAPHY(Point, 4326)" NOT NULL,
+	"geog" geography(Point, 4326) NOT NULL,
 	"status" varchar(16) DEFAULT 'Active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,

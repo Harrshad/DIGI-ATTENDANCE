@@ -8,6 +8,13 @@
       "when": 1792133784190,
       "tag": "0000_luxuriant_agent_zero",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795668156974,
+      "tag": "0001_broken_gamora",
+      "breakpoints": true
     }
   ]
 }
